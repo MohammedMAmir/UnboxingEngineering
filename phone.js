@@ -28,9 +28,8 @@ camera.lookAt(0,0,0);
 const loaded = new THREE.TextureLoader();
 loaded.load('background.png', function (texture)
             {
-    scene.background = texture;  
-    scene.background.encoding = THREE.sRGBEncoding;
-
+            scene.background = texture;  
+            scene.background.encoding = THREE.sRGBEncoding;
             });
 
 
@@ -154,18 +153,19 @@ function onClick(event) {
     console.log('Clicked on:', clickedObject.name);
     camera.lookAt(mouse.x, mouse.y, 0);
     //tweenToClick(intersects[0]);
-    hide(model, clickedObject);
-    var showObject = clickedObject.parent;
-    showObject.rotateX(-Math.PI*1/2)
-    showObject.frustumCulled = true;
-    showObject.scale.set(50,50,50);
-    showObject.translateZ(-300);
-    scene.add(showObject);
+    hide(model.children[0], clickedObject);
+    clickedObject.rotateX(-Math.PI*1/2)
+    clickedObject.frustumCulled = true;
+    clickedObject.scale.set(50,50,50);
+    clickedObject.translateZ(-300);
+    scene.add(clickedObject);
     console.log(clickedObject);
     //camera.position.set(50,20,0);
     
   }
 }
+
+
 
 let loader = new GLTFLoader();
 loader.load('models/iphone12_less_parts/iphone12_less_parts.glb', function(gltf){
