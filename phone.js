@@ -24,13 +24,11 @@ camera.position.y = 0;
 camera.position.z = -2500;
 camera.lookAt(0,0,0);
 
-const loaded = new THREE.TextureLoader().load('Hexagon.svg');
-loaded.wrapS = THREE.RepeatWrapping;
-loaded.wrapT = THREE.RepeatWrapping;
-loaded.repeat.set( 4, 4 );
-scene.background = loaded;  
-
-           
+const loaded = new THREE.TextureLoader();
+loaded.load('background.jpg' , function(texture)
+            {
+             scene.background = texture;  
+            });
 
 
 const orbit = new OrbitControls(camera, renderer.domElement);
@@ -119,16 +117,15 @@ function tweenToClick(intersection){
 }*/
 
 function hide(object, targetObject){
-    if (object.children.length == 0){
+    if (object.children.length = 0){
         if (object != targetObject){
-            object.removeFromParent();
+            object.visible = false
             return;
         }
     }else{
         for(let i = 0; i < object.children.length; i++){
             if (object.children[i] != targetObject){
                 hide(object.children[i], targetObject)
-                object.removeFromParent();
                 return;
             } 
         }
@@ -150,47 +147,45 @@ function onClick(event) {
 
   if (intersects.length > 0) {
     const clickedObject = intersects[0].object;
+    console.log(clickedObject);
     console.log('Clicked on:', clickedObject.name);
     camera.lookAt(mouse.x, mouse.y, 0);
     //tweenToClick(intersects[0]);
-    hide(scene.children[3], clickedObject);
+    hide(model, clickedObject);
     var showObject = clickedObject.parent;
     showObject.rotateX(-Math.PI*1/2)
     showObject.frustumCulled = true;
     showObject.scale.set(50,50,50);
     showObject.translateZ(-300);
-    console.log(scene);
     scene.add(showObject);
+    console.log(clickedObject);
     //camera.position.set(50,20,0);
+    
   }
 }
 
 let loader = new GLTFLoader();
-function load_main_model() {
-    loader.load('models/iphone12_less_parts/iphone12_less_parts.glb', function(gltf){
-        model = gltf.scene;
-        model.children[0].scale.set(4600,4600,4600);
-        mixer = new THREE.AnimationMixer(model);
-        const clips = gltf.animations;
-    
-        clips.forEach(function(clip) {
-            const action = mixer.clipAction(clip);
-            action.play();
-        })
-    
-        model.traverse( function( object ) {
-    
-            object.frustumCulled = false;
-        
-        } );
-        
-        model.translateY(-300);
-        scene.add(model);
-        renderer.domElement.addEventListener('click', onClick);
-    })
-}
+loader.load('models/iphone12_less_parts/iphone12_less_parts.glb', function(gltf){
+    model = gltf.scene;
+    model.children[0].scale.set(4600,4600,4600);
+    mixer = new THREE.AnimationMixer(model);
+    const clips = gltf.animations;
 
-load_main_model();
+    clips.forEach(function(clip) {
+        const action = mixer.clipAction(clip);
+        action.play();
+    })
+
+    model.traverse( function( object ) {
+
+        object.frustumCulled = false;
+    
+    } );
+    
+    model.translateY(-300);
+    scene.add(model);
+    renderer.domElement.addEventListener('click', onClick);
+})
 
 const clock = new THREE.Clock();
 function animate() {
@@ -206,15 +201,6 @@ window.addEventListener('resize', function() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    const targetAspect = window.innerWidth / window.innerHeight;
-    const imageAspect = imageWidth / imageHeight;
-    const factor = imageAspect / targetAspect;
-    // When factor larger than 1, that means texture 'wilder' than target。 
-    // we should scale texture height to target height and then 'map' the center  of texture to target， and vice versa.
-    scene.background.offset.x = factor > 1 ? (1 - 1 / factor) / 2 : 0;
-    scene.background.repeat.x = factor > 1 ? 1 / factor : 1;
-    scene.background.offset.y = factor > 1 ? 0 : (1 - factor) / 2;
-    scene.background.repeat.y = factor > 1 ? 1 : factor;
 })
 
 // let scene = new THREE.Scene();
