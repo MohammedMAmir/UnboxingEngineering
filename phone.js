@@ -7,10 +7,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 
 import TWEEN from '@tweenjs/tween.js'
-
 const renderer = new THREE.WebGLRenderer({ alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+const canvasContainer = document.getElementById('canvas-container');
+renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+canvasContainer.appendChild(renderer.domElement);
 
+// renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -160,8 +162,23 @@ function onClick(event) {
     clickedObject.translateZ(-300);
     scene.add(clickedObject);
     console.log(clickedObject);
-    //camera.position.set(50,20,0);
-    
+
+    // Create and append three table cells (columns) to the row
+      for (var i = 1; i <= 2; i++) {
+          var div = document.createElement("div");
+          div.className = "column"; // Add the "column" class for styling
+          div.textContent = "Column " + i + 1; // Set content (you can add your own content here)
+          document.body.appendChild(div);
+      }
+
+      renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+
+      const newWidth = canvasContainer.clientWidth;
+      const newHeight = canvasContainer.clientHeight;
+
+      renderer.setSize(newWidth, newHeight);
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
   }
 }
 
@@ -176,36 +193,53 @@ loader.load('models/iphone12_less_parts/iphone12_less_parts.glb', function(gltf)
 
     clips.forEach(function(clip) {
         const action = mixer.clipAction(clip);
+        action.repetitions = 1;
         action.play();
     })
-
     model.traverse( function( object ) {
 
         object.frustumCulled = false;
-    
+
     } );
-    
+
     model.translateY(-300);
     scene.add(model);
     renderer.domElement.addEventListener('click', onClick);
 })
 
 const clock = new THREE.Clock();
+// let clock;
+let elapsed = 0
+let curr = 0;
+let stoptime = 19
+
 function animate() {
     if(mixer) {
-        mixer.update(clock.getDelta());
+        curr = clock.getDelta()
+        elapsed += curr;
+        if (elapsed < stoptime) {
+            mixer.update(curr);
+        }
     }
     renderer.render(scene, camera);
 }
 
 renderer.setAnimationLoop(animate);
 
-window.addEventListener('resize', function() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-})
+// window.addEventListener('resize', function() {
+//     camera.aspect = window.innerWidth / window.innerHeight;
+//     camera.updateProjectionMatrix();
+//     renderer.setSize(window.innerWidth, window.innerHeight);
+// })
 
+window.addEventListener('resize', () => {
+    const newWidth = canvasContainer.clientWidth;
+    const newHeight = canvasContainer.clientHeight;
+
+    renderer.setSize(newWidth, newHeight);
+    camera.aspect = newWidth / newHeight;
+    camera.updateProjectionMatrix();
+});
 // let scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xdddddd);
 //
